@@ -1,0 +1,5 @@
+WORLD_SIZE = 25
+WATER = 1
+GRASS = 2
+EMPTY = 0
+TYPE_A = 3

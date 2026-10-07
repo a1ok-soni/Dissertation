@@ -1,24 +1,10 @@
 import random
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.colors import ListedColormap
-from matplotlib.patches import Patch
-
-from .main import WORLD_SIZE, WATER, GRASS, EMPTY, TYPE_A
+from constants import TYPE_A, WATER, GRASS, EMPTY, WORLD_SIZE
+from world_renderer import WorldRenderer
 
 
-
-def show_world(world):
-    cmap = ListedColormap(["beige", "blue", "green"])
-    plt.figure(figsize=(8, 8))
-    plt.imshow(world, cmap=cmap, vmin=0, vmax=2, interpolation="nearest")
-    plt.legend(handles=[Patch(color="beige", label="Empty"),
-                        Patch(color="blue", label="Water"),
-                        Patch(color="green", label="Grass")],
-               loc="upper right", bbox_to_anchor=(1.25, 1))
-    plt.axis("off")
-    plt.tight_layout()
-    plt.show()
+death_counter = 0
 
 def generate_world(grid_size):
     world = [[0 for _ in range(grid_size)] for _ in range(grid_size)]
@@ -34,37 +20,71 @@ def generate_world(grid_size):
     return np.array(world)
 
 
+
 def org_behaviour(organism, world):
-    pass
+    if organism["energy"] <= 0:
+        organisms.remove(organism)
+        death_counter += 1
+        return
+    if organism["hunger"] >= 100:
+        organisms.remove(organism)
+        death_counter += 1
+        return
+    if organism["thirst"] >= 100:
+        organisms.remove(organism)
+        death_counter += 1
+        return
+    # TODO: Implement movement, figure out closest water and grass source and do a random selection of which one to go to
+
 
 
 def create_org_a(generation):
     return {
-        "age" : 1,
-        "generation" : generation+1,
-        "type" : "A",
-        "strength" : random.random(0,1),
-        "speed": random.random(0,1),
-        "intelligence": random.random(0,1),
+        "age": 1,
+        "generation": generation + 1,
+        "type": "A",
+        "strength": random.random(),
+        "speed": random.random(),
+        "intelligence": random.random(),
         "energy": 100,
         "hunger": 0,
         "thirst": 0,
-        "coordinates": (random.randint(0, WORLD_SIZE-1), random.randint(0, WORLD_SIZE-1))
+        "coordinates": (
+            random.randint(0, WORLD_SIZE - 1),
+            random.randint(0, WORLD_SIZE - 1),
+        ),
     }
 
 
-world = generate_world(WORLD_SIZE)
-show_world(world)
-
 organisms = []
-def start(world = None):
+
+
+def start(world=None):
     if world is None:
         world = generate_world(WORLD_SIZE)
+    renderer = WorldRenderer(world)
 
+    day = 0
     year = 0
     for _ in range(10):
         organisms.append(create_org_a(0))
-    while True:
+        # add to world
+        world[organisms[-1]["coordinates"]] = TYPE_A
 
-        show_world(world)
-        year += 1
+        # while True:
+        #     for organism in organisms:
+        #         org_behaviour(organism, world)
+
+        renderer.save(world, organisms, day, year)
+        day += 1
+        if day % 365 == 0:
+            year += 1
+            print("Year: ", year)
+            day = 0
+
+    renderer.close()
+
+
+if __name__ == "__main__":
+    world = generate_world(WORLD_SIZE)
+    start(world)

@@ -1,6 +1,0 @@
-WORLD_SIZE = 25
-WATER = 1
-GRASS = 2
-EMPTY = 0
-TYPE_A = 3
-TYPE_B = 4
